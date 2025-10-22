@@ -12,7 +12,7 @@
 namespace
 {
 constexpr const char* kDefaultCpmFile = "problem_data/data00.txt";
-constexpr const char* kDefaultPertFile = "problem_data/pert_data.txt";
+constexpr const char* kDefaultPertFile = "problem_data/pert_data_3.txt";
 }
 
 int main(int argc, char* argv[])

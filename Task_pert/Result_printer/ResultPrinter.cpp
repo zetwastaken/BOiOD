@@ -1,10 +1,13 @@
 #include "ResultPrinter.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #if !defined(_WIN32)
 #include <unistd.h>
@@ -101,6 +104,106 @@ std::string taskLabel(int id)
         value = value / 26 - 1;
     }
     return label;
+}
+
+void printHistogram(const PERTSimulation& simulation,
+                    std::ostream& output,
+                    bool useColor)
+{
+    if (simulation.completionTimes.empty())
+    {
+        return;
+    }
+
+    const double minValue = simulation.minDuration;
+    const double maxValue = simulation.maxDuration;
+    const double range = maxValue - minValue;
+    const double epsilon = std::numeric_limits<double>::epsilon() * std::max(1.0, std::abs(minValue));
+
+    // Handle the degenerate case where every simulation finished at the same time.
+    if (range <= epsilon)
+    {
+        applyColor(output, useColor, LABEL_COLOR);
+        output << "  All simulations completed at approximately ";
+        applyColor(output, useColor, VALUE_COLOR);
+        output << std::setprecision(1) << minValue;
+        applyColor(output, useColor, RESET_COLOR);
+        output << '\n';
+        return;
+    }
+
+    constexpr int kBinCount = 20;
+    constexpr int kMaxBarWidth = 40;
+
+    std::vector<int> counts(kBinCount, 0);
+    for (double time : simulation.completionTimes)
+    {
+        const double normalized = (time - minValue) / range;
+        int index = static_cast<int>(normalized * kBinCount);
+        if (index < 0)
+        {
+            index = 0;
+        }
+        else if (index >= kBinCount)
+        {
+            index = kBinCount - 1;
+        }
+        ++counts[index];
+    }
+
+    const int maxCount = *std::max_element(counts.begin(), counts.end());
+    if (maxCount == 0)
+    {
+        return;
+    }
+
+    int firstBin = 0;
+    while (firstBin < kBinCount && counts[firstBin] == 0)
+    {
+        ++firstBin;
+    }
+
+    int lastBin = kBinCount - 1;
+    while (lastBin > firstBin && counts[lastBin] == 0)
+    {
+        --lastBin;
+    }
+
+    output << std::setprecision(1);
+    for (int i = firstBin; i <= lastBin; ++i)
+    {
+        const double binStart = minValue + (range * i) / kBinCount;
+        const double binEnd = (i == kBinCount - 1) ? maxValue : minValue + (range * (i + 1)) / kBinCount;
+
+        applyColor(output, useColor, LABEL_COLOR);
+    output << "  [" << std::setw(7) << binStart << ", " << std::setw(7) << binEnd
+               << (i == kBinCount - 1 ? "]" : ")");
+        applyColor(output, useColor, VALUE_COLOR);
+        output << " | ";
+
+        int barLength = 0;
+        if (counts[i] > 0)
+        {
+            barLength = static_cast<int>(std::round(static_cast<double>(counts[i]) / maxCount * kMaxBarWidth));
+            if (barLength == 0)
+            {
+                barLength = 1;
+            }
+        }
+
+        for (int j = 0; j < barLength; ++j)
+        {
+            output << '#';
+        }
+
+        if (barLength > 0)
+        {
+            output << ' ';
+        }
+
+        output << counts[i] << '\n';
+        applyColor(output, useColor, RESET_COLOR);
+    }
 }
 }
 
@@ -361,6 +464,15 @@ void ResultPrinter::printSimulation(const PERTSimulation& result,
 
     applyColor(output, useColor, RESET_COLOR);
     output << '\n';
+
+    if (!result.completionTimes.empty())
+    {
+        applyColor(output, useColor, SECTION_COLOR);
+        output << "Duration histogram:" << '\n';
+        applyColor(output, useColor, RESET_COLOR);
+        printHistogram(result, output, useColor);
+        output << '\n';
+    }
 
     output.flags(originalFlags);
     output.precision(originalPrecision);

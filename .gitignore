@@ -4,3 +4,12 @@
 Makefile
 build/
 cmake-build-*/
+*.o
+*.obj
+*.exe
+*.out
+*.log
+*.pch
+*.ilk
+*.pdb
+*.idb
