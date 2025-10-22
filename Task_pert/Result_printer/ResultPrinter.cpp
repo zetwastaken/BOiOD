@@ -298,3 +298,70 @@ void ResultPrinter::printPERT(const ProjectDataPert& projectData,
     output.flags(originalFlags);
     output.precision(originalPrecision);
 }
+
+void ResultPrinter::printSimulation(const PERTSimulation& result,
+                                              double targetTime,
+                                              double targetProbability,
+                                              std::ostream& output)
+{
+    const bool useColor = streamSupportsColor(output);
+    const auto originalFlags = output.flags();
+    const auto originalPrecision = output.precision();
+
+    applyColor(output, useColor, TITLE_COLOR);
+    output << '\n' << "=== PERT Simulation Result ===" << '\n';
+    applyColor(output, useColor, RESET_COLOR);
+
+    applyColor(output, useColor, SECTION_COLOR);
+    output << "Schedule statistics (based on " << result.simulations << " simulations):" << '\n';
+    applyColor(output, useColor, RESET_COLOR);
+
+    output.setf(std::ios::fixed, std::ios::floatfield);
+
+    applyColor(output, useColor, LABEL_COLOR);
+    output << "  Expected duration: ";
+    applyColor(output, useColor, VALUE_COLOR);
+    output << std::setprecision(1) << result.meanDuration << '\n';
+
+    applyColor(output, useColor, LABEL_COLOR);
+    output << "  Standard deviation: ";
+    applyColor(output, useColor, VALUE_COLOR);
+    output << std::setprecision(2) << result.standardDeviation << '\n';
+
+    applyColor(output, useColor, LABEL_COLOR);
+    output << "  Target time: ";
+    applyColor(output, useColor, VALUE_COLOR);
+    output << std::setprecision(1) << targetTime << '\n';
+
+    // Calculate probability to meet target time
+    double onTimeProbability = 0.0;
+    for (double time : result.completionTimes)
+    {
+        if (time <= targetTime)
+        {
+            onTimeProbability += 1.0;
+        }
+    }
+    onTimeProbability /= result.simulations;
+
+    applyColor(output, useColor, LABEL_COLOR);
+    output << "  Probability to meet target: ";
+    applyColor(output, useColor, VALUE_COLOR);
+    output << std::setprecision(4) << onTimeProbability;
+    applyColor(output, useColor, RESET_COLOR);
+    output << '\n';
+
+    // Calculate required time for target probability
+    const double timeForProbability = result.getPercentile(targetProbability * 100.0);
+
+    applyColor(output, useColor, LABEL_COLOR);
+    output << "  Required time for target probability (" << std::setprecision(2) << targetProbability * 100.0 << "%): ";
+    applyColor(output, useColor, VALUE_COLOR);
+    output << std::setprecision(2) << timeForProbability << '\n';
+
+    applyColor(output, useColor, RESET_COLOR);
+    output << '\n';
+
+    output.flags(originalFlags);
+    output.precision(originalPrecision);
+}

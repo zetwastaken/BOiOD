@@ -1,7 +1,12 @@
 #include "PERTCalculator.h"
+#include "../CPM/CPMCalculator.h"
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
+#include <limits>
+#include <random>
+#include <numeric>
 
 namespace
 {
@@ -145,5 +150,98 @@ PERTResult PERTCalculator::analyze(std::map<int, Task_pert>& tasks)
     }
 
     result.standardDeviation = std::sqrt(result.variance);
+    return result;
+}
+
+double PERTSimulation::getPercentile(double percentile) const
+{
+    if (completionTimes.empty() || percentile < 0.0 || percentile > 100.0)
+    {
+        return 0.0;
+    }
+
+    std::vector<double> sortedTimes = completionTimes;
+    std::sort(sortedTimes.begin(), sortedTimes.end());
+
+    const double index = (percentile / 100.0) * (sortedTimes.size() - 1);
+    const std::size_t lowerIndex = static_cast<std::size_t>(std::floor(index));
+    const std::size_t upperIndex = static_cast<std::size_t>(std::ceil(index));
+
+    if (lowerIndex == upperIndex)
+    {
+        return sortedTimes[lowerIndex];
+    }
+
+    const double weight = index - lowerIndex;
+    return sortedTimes[lowerIndex] * (1.0 - weight) + sortedTimes[upperIndex] * weight;
+}
+
+PERTSimulation PERTCalculator::analyzeSimulation(std::map<int, Task_pert>& tasks, int numSimulations)
+{
+    PERTSimulation result;
+    if (tasks.empty() || numSimulations <= 0)
+    {
+        return result;
+    }
+
+    result.simulations = numSimulations;
+    result.completionTimes.reserve(numSimulations);
+
+    // Setup random number generation
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Run simulations
+    for (int sim = 0; sim < numSimulations; ++sim)
+    {
+        // Create a CPM task map with randomized durations
+        std::map<int, Task> cpmTasks;
+        
+        for (const auto& [id, pertTask] : tasks)
+        {
+            // Generate random duration using Beta distribution (PERT-style)
+            // Beta distribution parameters for PERT: alpha=4, beta=4
+            // This gives a bell-shaped distribution centered around most_likely_time
+            
+            const double a = static_cast<double>(pertTask.optimistic_time);
+            const double b = static_cast<double>(pertTask.pessimistic_time);
+                        
+            // Use uniform distribution between optimistic and pessimistic times
+            std::uniform_real_distribution<double> uniformDist(a, b);
+            double randomDuration = uniformDist(gen);
+            
+            // Create CPM task with random duration (rounded to integer)
+            Task cpmTask(id, static_cast<int>(std::round(randomDuration)));
+            cpmTask.predecessors = pertTask.predecessors;
+            cpmTask.successors = pertTask.successors;
+            
+            cpmTasks[id] = cpmTask;
+        }
+        
+        // Run CPM analysis on the randomized tasks
+        CPMResult cpmResult = CPMCalculator::analyze(cpmTasks);
+        
+        // Store the completion time
+        const double completionTime = static_cast<double>(cpmResult.totalDuration);
+        result.completionTimes.push_back(completionTime);
+        
+    }
+
+    // Calculate statistics
+    result.minDuration = *std::min_element(result.completionTimes.begin(), result.completionTimes.end());
+    result.maxDuration = *std::max_element(result.completionTimes.begin(), result.completionTimes.end());
+    
+    const double sum = std::accumulate(result.completionTimes.begin(), result.completionTimes.end(), 0.0);
+    result.meanDuration = sum / numSimulations;
+
+    // Calculate standard deviation
+    double sumSquaredDiff = 0.0;
+    for (double time : result.completionTimes)
+    {
+        const double diff = time - result.meanDuration;
+        sumSquaredDiff += diff * diff;
+    }
+    result.standardDeviation = std::sqrt(sumSquaredDiff / numSimulations);
+
     return result;
 }

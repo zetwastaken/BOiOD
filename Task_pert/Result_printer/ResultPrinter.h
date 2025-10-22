@@ -19,6 +19,11 @@ public:
     static void printPERT(const ProjectDataPert& projectData,
                           const PERTResult& result,
                           std::ostream& output);
+
+    static void printSimulation(const PERTSimulation& result,
+                                          double targetTime,
+                                          double targetProbability,
+                                          std::ostream& output);
 };
 
 #endif // RESULT_PRINTER_H
