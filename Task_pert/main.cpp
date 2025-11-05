@@ -34,6 +34,7 @@ struct BenchmarkOptions
     bool enabled = false;
     std::vector<int> sizes{10, 30, 50, 100, 200, 400};
     std::uint32_t seed = 123;
+    int pertSimulations = 1000;
 };
 
 struct ParsedArguments
@@ -200,8 +201,34 @@ bool parseArguments(int argc, char* argv[], ParsedArguments& out)
                 return false;
             }
         }
-        else if (argument == "--benchmark-cpm")
+        else if (argument == "--benchmark-cpm" || argument == "--benchmark")
         {
+            out.benchmark.enabled = true;
+            continue;
+        }
+        else if (argument == "--benchmark-pert-sim")
+        {
+            if (i + 1 >= argc)
+            {
+                std::cerr << "Missing value for " << argument << '\n';
+                return false;
+            }
+            const std::string value = argv[++i];
+            try
+            {
+                const int runs = std::stoi(value);
+                if (runs < 0)
+                {
+                    std::cerr << "Benchmark simulation count must be non-negative: " << value << '\n';
+                    return false;
+                }
+                out.benchmark.pertSimulations = runs;
+            }
+            catch (const std::exception&)
+            {
+                std::cerr << "Invalid integer value for " << argument << ": " << value << '\n';
+                return false;
+            }
             out.benchmark.enabled = true;
             continue;
         }
@@ -320,6 +347,47 @@ ProjectData createProjectDataFromPert(const ProjectDataPert& pertData)
     return project;
 }
 
+double normalCDF(double z)
+{
+    return 0.5 * (1.0 + std::erf(z / std::sqrt(2.0)));
+}
+
+double normalInvCDF(double p)
+{
+    if (p > 0.999)
+    {
+        return 3.29;
+    }
+    if (p > 0.99)
+    {
+        return 2.33;
+    }
+    if (p < 0.001)
+    {
+        return -3.29;
+    }
+    if (p < 0.01)
+    {
+        return -2.33;
+    }
+
+    double low = -8.0;
+    double high = 8.0;
+    for (int i = 0; i < 100; ++i)
+    {
+        const double mid = (low + high) / 2.0;
+        if (normalCDF(mid) < p)
+        {
+            low = mid;
+        }
+        else
+        {
+            high = mid;
+        }
+    }
+    return high;
+}
+
 int runBenchmark(const ParsedArguments& args)
 {
     if (args.benchmark.sizes.empty())
@@ -346,6 +414,28 @@ int runBenchmark(const ParsedArguments& args)
 
     std::vector<Row> results;
     results.reserve(args.benchmark.sizes.size());
+
+    struct PertRow
+    {
+        int nodes = 0;
+        double targetTime = 0.0;
+        double targetProbability = 0.0;
+        std::int64_t analyticTimeUs = 0;
+        double analyticExpected = 0.0;
+        double analyticStdDev = 0.0;
+        double analyticProbability = 0.0;
+        double analyticRequired = 0.0;
+        bool hasSimulation = false;
+        int simulations = 0;
+        std::int64_t simulationTimeUs = 0;
+        double simExpected = 0.0;
+        double simStdDev = 0.0;
+        double simProbability = 0.0;
+        double simRequired = 0.0;
+    };
+
+    std::vector<PertRow> pertResults;
+    pertResults.reserve(args.benchmark.sizes.size());
 
     for (int nodes : args.benchmark.sizes)
     {
@@ -406,6 +496,62 @@ int runBenchmark(const ParsedArguments& args)
         row.ratio = row.topoMs > 0.0 ? row.bellmanMs / row.topoMs : 0.0;
 
         results.push_back(row);
+
+        auto pertTasksAnalytic = pertData.tasks;
+        auto startPertAnalytic = std::chrono::high_resolution_clock::now();
+        PERTResult pertAnalytic = PERTCalculator::analyze(pertTasksAnalytic);
+        auto endPertAnalytic = std::chrono::high_resolution_clock::now();
+        const auto pertAnalyticDuration = std::chrono::duration_cast<std::chrono::microseconds>(endPertAnalytic - startPertAnalytic);
+
+        PertRow pertRow;
+        pertRow.nodes = nodes;
+        pertRow.targetTime = pertData.target_time;
+        pertRow.targetProbability = pertData.target_probability;
+        pertRow.analyticTimeUs = pertAnalyticDuration.count();
+        pertRow.analyticExpected = pertAnalytic.expectedDuration;
+        pertRow.analyticStdDev = pertAnalytic.standardDeviation;
+        if (pertAnalytic.standardDeviation > 0.0)
+        {
+            const double zScore = (pertRow.targetTime - pertRow.analyticExpected) / pertRow.analyticStdDev;
+            pertRow.analyticProbability = normalCDF(zScore);
+            const double zForProb = normalInvCDF(pertRow.targetProbability);
+            pertRow.analyticRequired = pertRow.analyticExpected + pertRow.analyticStdDev * zForProb;
+        }
+        else
+        {
+            pertRow.analyticProbability = pertRow.targetTime >= pertRow.analyticExpected ? 1.0 : 0.0;
+            pertRow.analyticRequired = pertRow.analyticExpected;
+        }
+
+        if (args.benchmark.pertSimulations > 0)
+        {
+            auto pertTasksSim = pertData.tasks;
+            auto startPertSim = std::chrono::high_resolution_clock::now();
+            PERTSimulation pertSimulation = PERTCalculator::analyzeSimulation(pertTasksSim, args.benchmark.pertSimulations);
+            auto endPertSim = std::chrono::high_resolution_clock::now();
+            const auto pertSimDuration = std::chrono::duration_cast<std::chrono::microseconds>(endPertSim - startPertSim);
+            pertRow.hasSimulation = pertSimulation.simulations > 0 && !pertSimulation.completionTimes.empty();
+            pertRow.simulations = pertSimulation.simulations;
+            if (pertRow.hasSimulation)
+            {
+                pertRow.simulationTimeUs = pertSimDuration.count();
+                pertRow.simExpected = pertSimulation.meanDuration;
+                pertRow.simStdDev = pertSimulation.standardDeviation;
+
+                int onTimeCount = 0;
+                for (double value : pertSimulation.completionTimes)
+                {
+                    if (value <= pertRow.targetTime)
+                    {
+                        ++onTimeCount;
+                    }
+                }
+                pertRow.simProbability = static_cast<double>(onTimeCount) / static_cast<double>(pertSimulation.completionTimes.size());
+                pertRow.simRequired = pertSimulation.getPercentile(pertRow.targetProbability * 100.0);
+            }
+        }
+
+        pertResults.push_back(pertRow);
     }
 
     if (results.empty())
@@ -437,6 +583,77 @@ int runBenchmark(const ParsedArguments& args)
 
     std::cout << '\n';
     std::cout.unsetf(std::ios::floatfield);
+
+    if (!pertResults.empty())
+    {
+        std::cout << "PERT benchmark (analytic vs simulation)\n";
+        if (args.benchmark.pertSimulations > 0)
+        {
+            std::cout << "Simulations per instance: " << args.benchmark.pertSimulations << '\n';
+        }
+        else
+        {
+            std::cout << "Simulation disabled (use --benchmark-pert-sim N to enable).\n";
+        }
+
+        const std::string separator(192, '-');
+        std::cout << std::left
+                  << std::setw(8) << "Nodes"
+                  << std::setw(12) << "Target"
+                  << std::setw(12) << "Prob (%)"
+                  << std::setw(14) << "Analytic μ"
+                  << std::setw(14) << "Analytic σ"
+                  << std::setw(14) << "Analytic (ms)"
+                  << std::setw(18) << "Analytic P<=T"
+                  << std::setw(20) << "Analytic T@Prob"
+                  << std::setw(14) << "Sim μ"
+                  << std::setw(14) << "Sim σ"
+                  << std::setw(14) << "Sim (ms)"
+                  << std::setw(18) << "Sim P<=T"
+                  << std::setw(20) << "Sim T@Prob"
+                  << '\n';
+        std::cout << separator << '\n';
+
+        auto formatValue = [](double value, int precision) -> std::string {
+            std::ostringstream oss;
+            oss.setf(std::ios::fixed);
+            oss << std::setprecision(precision) << value;
+            return oss.str();
+        };
+
+        auto formatOptional = [&](bool available, double value, int precision) -> std::string {
+            if (!available)
+            {
+                return "n/a";
+            }
+            return formatValue(value, precision);
+        };
+
+        for (const PertRow& row : pertResults)
+        {
+            std::cout << std::left
+                      << std::setw(8) << row.nodes
+                      << std::setw(12) << formatValue(row.targetTime, 3)
+                      << std::setw(12) << formatValue(row.targetProbability * 100.0, 2)
+                      << std::setw(14) << formatValue(row.analyticExpected, 3)
+                      << std::setw(14) << formatValue(row.analyticStdDev, 3)
+                      << std::setw(14) << formatValue(static_cast<double>(row.analyticTimeUs) / 1000.0, 3)
+                      << std::setw(18) << formatValue(row.analyticProbability, 4)
+                      << std::setw(20) << formatValue(row.analyticRequired, 3)
+                      << std::setw(14) << formatOptional(row.hasSimulation, row.simExpected, 3)
+                      << std::setw(14) << formatOptional(row.hasSimulation, row.simStdDev, 3)
+                      << std::setw(14) << formatOptional(row.hasSimulation,
+                                                         static_cast<double>(row.simulationTimeUs) / 1000.0,
+                                                         3)
+                      << std::setw(18) << formatOptional(row.hasSimulation, row.simProbability, 4)
+                      << std::setw(20) << formatOptional(row.hasSimulation, row.simRequired, 3)
+                      << '\n';
+        }
+
+        std::cout << separator << '\n';
+        std::cout << '\n';
+    }
+
     return 0;
 }
 } // namespace
@@ -562,6 +779,7 @@ int main(int argc, char* argv[])
     {
         std::cout << "\nPERT simulation skipped (use --simulations N to configure runs).\n";
     }
+    ResultPrinter::printPERTSummary(pertData, pertResult, durationMC.has_value() ? &simulationResult : nullptr, std::cout);
 
     // Display execution times
     std::cout << "\n========================================\n";

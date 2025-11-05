@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -398,6 +399,65 @@ void ResultPrinter::printPERT(const ProjectDataPert& projectData,
     applyColor(output, useColor, RESET_COLOR);
     output << '\n';
 
+    if (!projectData.tasks.empty())
+    {
+        const std::unordered_set<int> criticalIds(result.criticalPath.begin(), result.criticalPath.end());
+        const std::string separator(116, '-');
+
+        auto formatDouble = [](double value, int precision) {
+            std::ostringstream oss;
+            oss.setf(std::ios::fixed);
+            oss << std::setprecision(precision) << value;
+            return oss.str();
+        };
+
+        applyColor(output, useColor, SECTION_COLOR);
+        output << "Task schedule:" << '\n';
+        applyColor(output, useColor, RESET_COLOR);
+        output << separator << '\n';
+
+        applyColor(output, useColor, HEADER_COLOR);
+        output << std::left
+               << std::setw(6) << "ID"
+               << std::setw(6) << "a"
+               << std::setw(6) << "m"
+               << std::setw(6) << "b"
+               << std::setw(12) << "Expected"
+               << std::setw(12) << "StdDev"
+               << std::setw(12) << "EarlyStart"
+               << std::setw(12) << "EarlyFinish"
+               << std::setw(12) << "LateStart"
+               << std::setw(12) << "LateFinish"
+               << std::setw(10) << "Slack"
+               << '\n';
+        applyColor(output, useColor, RESET_COLOR);
+        output << separator << '\n';
+
+        for (const auto& [id, task] : projectData.tasks)
+        {
+            const bool onCriticalPath = criticalIds.count(id) > 0;
+            applyColor(output, useColor, onCriticalPath ? CRITICAL_COLOR : VALUE_COLOR);
+            output << std::left
+                   << std::setw(6) << taskLabel(task.id)
+                   << std::setw(6) << task.optimistic_time
+                   << std::setw(6) << task.most_likely_time
+                   << std::setw(6) << task.pessimistic_time
+                   << std::setw(12) << formatDouble(task.expected_duration, 2)
+                   << std::setw(12) << formatDouble(std::sqrt(task.variance), 3)
+                   << std::setw(12) << formatDouble(task.ES, 2)
+                   << std::setw(12) << formatDouble(task.EF, 2)
+                   << std::setw(12) << formatDouble(task.LS, 2)
+                   << std::setw(12) << formatDouble(task.LF, 2)
+                   << std::setw(10) << formatDouble(task.slack, 2)
+                   << '\n';
+            applyColor(output, useColor, RESET_COLOR);
+        }
+
+        output << separator << '\n';
+        applyColor(output, useColor, RESET_COLOR);
+        output << '\n';
+    }
+
     output.flags(originalFlags);
     output.precision(originalPrecision);
 }
@@ -473,6 +533,119 @@ void ResultPrinter::printSimulation(const PERTSimulation& result,
         printHistogram(result, output, useColor);
         output << '\n';
     }
+
+    output.flags(originalFlags);
+    output.precision(originalPrecision);
+}
+
+void ResultPrinter::printPERTSummary(const ProjectDataPert& projectData,
+                                     const PERTResult& analytic,
+                                     const PERTSimulation* simulation,
+                                     std::ostream& output)
+{
+    const bool useColor = streamSupportsColor(output);
+    const auto originalFlags = output.flags();
+    const auto originalPrecision = output.precision();
+
+    auto analyticProbability = [&]() {
+        if (analytic.standardDeviation > 0.0)
+        {
+            const double zScore = (projectData.target_time - analytic.expectedDuration) / analytic.standardDeviation;
+            return normalCDF(zScore);
+        }
+        return projectData.target_time >= analytic.expectedDuration ? 1.0 : 0.0;
+    }();
+
+    auto analyticRequired = [&]() {
+        if (analytic.standardDeviation > 0.0)
+        {
+            const double z = normalInvCDF(projectData.target_probability);
+            return analytic.expectedDuration + analytic.standardDeviation * z;
+        }
+        return analytic.expectedDuration;
+    }();
+
+    double simulationProbability = 0.0;
+    double simulationRequired = 0.0;
+    bool hasSimulation = simulation != nullptr && simulation->simulations > 0 && !simulation->completionTimes.empty();
+    if (hasSimulation)
+    {
+        for (double time : simulation->completionTimes)
+        {
+            if (time <= projectData.target_time)
+            {
+                simulationProbability += 1.0;
+            }
+        }
+        simulationProbability /= static_cast<double>(simulation->completionTimes.size());
+        simulationRequired = simulation->getPercentile(projectData.target_probability * 100.0);
+    }
+
+    applyColor(output, useColor, SECTION_COLOR);
+    output << "\nPERT summary table:\n";
+    applyColor(output, useColor, RESET_COLOR);
+
+    const std::string separator(88, '-');
+    output << separator << '\n';
+
+    output.setf(std::ios::fixed, std::ios::floatfield);
+    output << std::left
+           << std::setw(12) << "Variant"
+           << std::right
+           << std::setw(14) << "Expected"
+           << std::setw(14) << "StdDev"
+           << std::setw(14) << "Target"
+           << std::setw(16) << "P(T<=target)"
+           << std::setw(18) << "Time@targetProb"
+           << '\n';
+    output << separator << '\n';
+
+    auto printRow = [&](const std::string& label,
+                        double expected,
+                        double stddev,
+                        double probability,
+                        double required) {
+        applyColor(output, useColor, VALUE_COLOR);
+        output << std::left << std::setw(12) << label;
+        output << std::right
+               << std::setw(14) << std::setprecision(3) << expected
+               << std::setw(14) << std::setprecision(3) << stddev
+               << std::setw(14) << std::setprecision(3) << projectData.target_time
+               << std::setw(16) << std::setprecision(4) << probability
+               << std::setw(18) << std::setprecision(3) << required
+               << '\n';
+        applyColor(output, useColor, RESET_COLOR);
+    };
+
+    printRow("Analytic",
+             analytic.expectedDuration,
+             analytic.standardDeviation,
+             analyticProbability,
+             analyticRequired);
+
+    if (hasSimulation)
+    {
+        printRow("Simulation",
+                 simulation->meanDuration,
+                 simulation->standardDeviation,
+                 simulationProbability,
+                 simulationRequired);
+    }
+    else
+    {
+        applyColor(output, useColor, VALUE_COLOR);
+        output << std::left << std::setw(12) << "Simulation"
+               << std::right << std::setw(14) << "n/a"
+               << std::setw(14) << "n/a"
+               << std::setw(14) << std::setprecision(3) << projectData.target_time
+               << std::setw(16) << "n/a"
+               << std::setw(18) << "n/a"
+               << '\n';
+        applyColor(output, useColor, RESET_COLOR);
+    }
+
+    output << separator << '\n';
+    output << '\n';
 
     output.flags(originalFlags);
     output.precision(originalPrecision);

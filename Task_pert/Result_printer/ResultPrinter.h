@@ -21,9 +21,14 @@ public:
                           std::ostream& output);
 
     static void printSimulation(const PERTSimulation& result,
-                                          double targetTime,
-                                          double targetProbability,
-                                          std::ostream& output);
+                                 double targetTime,
+                                 double targetProbability,
+                                 std::ostream& output);
+
+    static void printPERTSummary(const ProjectDataPert& projectData,
+                                 const PERTResult& analytic,
+                                 const PERTSimulation* simulation,
+                                 std::ostream& output);
 };
 
 #endif // RESULT_PRINTER_H
