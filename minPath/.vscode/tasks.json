@@ -1,0 +1,65 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMAKE Configure",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-B${workspaceFolder}/build",
+                "-S${workspaceFolder}",
+                // Add any additional CMake configuration options below
+                // "-DCMAKE_BUILD_TYPE=Debug"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "CMAKE Build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build",
+                "--config",
+                "Debug"
+                // Add any additional build options below
+                // "--parallel 4"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "CMAKE Configure"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Clean Build Directory",
+            "type": "shell",
+            "command": "Remove-Item",
+            "args": [
+                "-Recurse",
+                "-Force",
+                "${workspaceFolder}/build"
+            ],
+            "windows": {
+                "command": "Remove-Item",
+                "args": [
+                    "-Recurse",
+                    "-Force",
+                    "${workspaceFolder}/build"
+                ]
+            },
+            "linux": {
+                "command": "rm",
+                "args": [
+                    "-rf",
+                    "${workspaceFolder}/build"
+                ]
+            },
+            "problemMatcher": []
+        }
+    ]
+}

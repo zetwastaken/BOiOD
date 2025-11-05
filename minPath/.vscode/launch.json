@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "minPath Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            // Update program path when changing build configuration or executable name
+            "program": "${workspaceFolder}/build/bin/minPath",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "windows": {
+                "program": "${workspaceFolder}/build/bin/Debug/minPath.exe",
+                "miDebuggerPath": "gdb.exe"
+            },
+            "linux": {
+                "miDebuggerPath": "/usr/bin/gdb"
+            },
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            // Build project before launching debugger
+            "preLaunchTask": "CMAKE Build"
+        }
+    ]
+}

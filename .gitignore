@@ -13,3 +13,5 @@ cmake-build-*/
 *.ilk
 *.pdb
 *.idb
+.vs/*
+
