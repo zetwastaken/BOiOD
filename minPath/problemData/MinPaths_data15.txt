@@ -1,0 +1,48 @@
+15
+  0  0  2  0  0  2  0  0  0  0  0  0  0  0  0
+  0  0  7  4  0  2  0  0  0  0  0  0  0  0  0
+  8  0  0  7  0  0  0  9  0  0  0  0  0  0  0
+  4  0  0  0  0  1  0  5  0  0  0  0  0  0  0
+  9  8  0  9  0  5  1  8  1  4  0  0  0  0  0
+  1  1  5  1  4  0  0  0  6  7  1  0  0  0  0
+  0  6  0  3  4  7  0  7  0  0  8  0  0  0  0
+  0  0  0  0  8  1  0  0  0  8  0  0  0  0  0
+  4  3  0  7  0  0  0  1  0  0  0  0  0  0  0
+  1  1  0  0  0  1  0  9  0  0  4  0  0  7  0
+  0  0  2  3  9  1  9  8  0  8  0  0  2  0  0
+  0  0  0  4  0  3  0  4  8  7  2  0  9  7  0
+  0  0  0  0  5  6  2  7  4  0  0  1  0  0  8
+  0  9  0  0  0  5  0  5  0  0  0  0  0  0  0
+  0  7  4  1  0  0  2  2  8  0  0  0  1  0  0
+
+
+Najkrótsze ścieżki:
+  0 [0]
+  3 [0, 5, 1]
+  2 [0, 2]
+  3 [0, 5, 3]
+  6 [0, 5, 4]
+  2 [0, 5]
+  7 [0, 5, 10, 12, 6]
+  8 [0, 5, 4, 8, 7]
+  7 [0, 5, 4, 8]
+  9 [0, 5, 9]
+  3 [0, 5, 10]
+  6 [0, 5, 10, 12, 11]
+  5 [0, 5, 10, 12]
+ 13 [0, 5, 10, 12, 11, 13]
+ 13 [0, 5, 10, 12, 14]
+
+
+Opis danych wejściowych:
+  Graf skierowany z dodatnimi wagami na krawędziach.
+  Pierwsza liczba N to liczba wierzchołków.
+  Kolejne N linii zawiera po N liczb.
+  Waga z węzła A do węzła B jest w wierszu A i kolumnie B
+  Waga 0 oznacza brak połączenia
+
+Opis Najkrótsze ścieżki:
+  Są to najkrótsze ścieżki z pierwszego do pozostałych wierzchołków.
+  Kolejne linie to opis ścieżki do kolejnych wierzchołków.
+  1 liczba oznacza długość ścieżki, -1 oznacza brak połączenia.
+  Następnie następuje lista wierzchołków zawartych w ścieżce.

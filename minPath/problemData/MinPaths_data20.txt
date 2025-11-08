@@ -1,0 +1,58 @@
+20
+  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+  7  0  0  0  0  3  2  0  0  0  0  0  0  0  0  0  0  0  0  0
+  0  2  0  6  7  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+  8  0  5  0  8  2  7  9  0  0  0  0  0  0  0  0  0  0  0  0
+  0  8  6  1  0  4  0  0  6  0  0  0  0  0  0  0  0  0  0  0
+  0  0  8  3  8  0  0  0  0  3  0  0  0  0  0  0  0  0  0  0
+  7  6  1  0  4  0  0  0  0  1  7  6  0  0  0  0  0  0  0  0
+  0  8  3  9  9  2  0  0  9  0  0  0  1  0  0  0  0  0  0  0
+  7  9  0  9  0  2  9  0  0  6  2  2  0  0  0  0  0  0  0  0
+  8  0  0  0  1  9  0  0  0  0  0  8  5  4  5  0  0  0  0  0
+  0  6  0  4  8  0  9  0  0  0  0  7  8  3  0  0  0  0  0  0
+  9  0  6  2  0  7  0  4  0  0  0  0  0  0  0  4  0  0  0  0
+  0  8  0  8  8  0  5  0  0  0  0  9  0  0  0  1  6  0  0  0
+  7  0  0  0  0  9  2  8  4  5  0  0  7  0  0  0  1  1  5  0
+  0  0  0  7  0  7  4  0  0  1  5  0  1  0  0  8  9  0  7  4
+  4  0  0  0  8  7  2  4  5  0  5  2  9  3  0  0  0  0  6  2
+  5  0  0  0  2  0  7  0  0  7  0  0  7  0  4  0  0  0  6  8
+  6  0  8  2  0  0  2  7  0  8  4  0  0  4  6  2  0  0  0  7
+  0  4  0  0  0  4  2  0  4  2  7  0  8  7  4  0  0  8  0  0
+  0  9  0  0  6  2  0  0  0  3  0  8  2  0  8  0  1  0  9  0
+
+
+Najkrótsze ścieżki:
+  0 [0]
+  3 [0, 2, 1]
+  1 [0, 2]
+  7 [0, 2, 3]
+  7 [0, 2, 1, 6, 9, 4]
+  6 [0, 2, 1, 5]
+  5 [0, 2, 1, 6]
+ 15 [0, 2, 1, 6, 11, 7]
+ 13 [0, 2, 1, 6, 9, 4, 8]
+  6 [0, 2, 1, 6, 9]
+ 12 [0, 2, 1, 6, 10]
+ 11 [0, 2, 1, 6, 11]
+ 11 [0, 2, 1, 6, 9, 12]
+ 10 [0, 2, 1, 6, 9, 13]
+ 11 [0, 2, 1, 6, 9, 14]
+ 12 [0, 2, 1, 6, 9, 12, 15]
+ 11 [0, 2, 1, 6, 9, 13, 16]
+ 11 [0, 2, 1, 6, 9, 13, 17]
+ 15 [0, 2, 1, 6, 9, 13, 18]
+ 14 [0, 2, 1, 6, 9, 12, 15, 19]
+
+
+Opis danych wejściowych:
+  Graf skierowany z dodatnimi wagami na krawędziach.
+  Pierwsza liczba N to liczba wierzchołków.
+  Kolejne N linii zawiera po N liczb.
+  Waga z węzła A do węzła B jest w wierszu A i kolumnie B
+  Waga 0 oznacza brak połączenia
+
+Opis Najkrótsze ścieżki:
+  Są to najkrótsze ścieżki z pierwszego do pozostałych wierzchołków.
+  Kolejne linie to opis ścieżki do kolejnych wierzchołków.
+  1 liczba oznacza długość ścieżki, -1 oznacza brak połączenia.
+  Następnie następuje lista wierzchołków zawartych w ścieżce.
