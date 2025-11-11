@@ -92,22 +92,3 @@ std::vector<std::vector<int>> generateAdjacencyMatrix(int numVertices, double de
 
     return adjacencyMatrix;
 }
-
-void printMatrix(const std::vector<std::vector<int>> &matrix)
-{
-    if (matrix.empty())
-    {
-        std::cout << "Matrix is empty." << std::endl;
-        return;
-    }
-
-    for (const auto& row : matrix)
-    {
-        for (int val : row)
-        {
-            if (val == INF) std::cout << "INF\t";
-            else std::cout << val <<"\t";
-        }
-        std::cout << std::endl;
-    }
-}

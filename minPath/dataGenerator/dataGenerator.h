@@ -9,6 +9,6 @@ constexpr int INF = std::numeric_limits<int>::max();
 
 std::vector<std::vector<int>> createAdjacencyMatrixFromFile(const std::string& filename);
 std::vector<std::vector<int>> generateAdjacencyMatrix(int numVertices, double density, int maxWeight);
-void printMatrix(const std::vector<std::vector<int>>& matrix);
+
 
 #endif  //! DATA_GENERATOR_H

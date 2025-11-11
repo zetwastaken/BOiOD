@@ -15,9 +15,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Source files - add new source files here
 set(SOURCES
     main.cpp
-    # Bellman-Ford/BellmanFord.cpp    # Uncomment when adding these files
+    Bellman-Ford/BellmanFord.cpp    # Uncomment when adding these files
     Dijkstra/dijkstra_algorithm.cpp
     dataGenerator/dataGenerator.cpp
+    aStar/aStar.cpp
 )
 
 # Include directories - add new include directories here
