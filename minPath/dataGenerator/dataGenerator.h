@@ -7,8 +7,11 @@
 
 constexpr int INF = std::numeric_limits<int>::max();
 
+struct Point;
+
 std::vector<std::vector<int>> createAdjacencyMatrixFromFile(const std::string& filename);
 std::vector<std::vector<int>> generateAdjacencyMatrix(int numVertices, double density, int maxWeight);
+std::vector<std::vector<int>> generateAdjacencyMatrixWithCoordinates(int numVertices, double density, std::vector<Point>& coordinates);
 
 
 #endif  //! DATA_GENERATOR_H

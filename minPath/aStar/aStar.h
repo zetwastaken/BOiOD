@@ -13,6 +13,7 @@ class AStar
 {
 public:
     AStar(const std::vector<std::vector<int>>& graph, const std::vector<Point>& coordinates);
+    AStar(const std::vector<std::vector<int>>& graph, const std::vector<Point>& coordinates, bool useHeuristic);
 
     //* finds shortest path from 'startVertex' to 'endVertex'
     bool findShortestPath(int startVertex, int endVertex);
@@ -27,6 +28,7 @@ private:
     std::vector<std::vector<int>> graph;
     std::vector<Point> coordinates;
     int numVertices;
+    bool useHeuristic = true;
 
     //* Results
     std::vector<int> path;

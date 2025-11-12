@@ -57,11 +57,13 @@ int main(int argc, char* argv[]) {
     //     size = matrix.size();
     // }
 
-    //Generate a random adjacency matrix
-    size = 1200;            // Number of vertices
-    double density = 0.75;  // Graph density (%)
+    //Generate a random adjacency matrix with coordinates
+    // Edge weights will be based on Euclidean distances between coordinates
+    size = 500;            // Number of vertices
+    double density = 0.6;  // Graph density (%)
     int maxWeight = 100;   // Maximum edge weight
-    matrix = generateAdjacencyMatrix(size, density, maxWeight);
+    // matrix = generateAdjacencyMatrix(size, density, maxWeight);
+    matrix = generateAdjacencyMatrixWithCoordinates(size, density, coordinates);
 
     if (matrix.empty()) {
         std::cerr << "Error: Failed to create graph." << std::endl;
@@ -72,11 +74,6 @@ int main(int argc, char* argv[]) {
     // std::cout << "Generated matrix:" << std::endl;
     // printMatrix(matrix);
     // std::cout << "\n";
-
-    // Generate random coordinates for A* algorithm
-    for (int i = 0; i < size; ++i) {
-        coordinates.push_back({rand() % 100, rand() % 100});
-    }
 
     // Define start and end vertices
     int startVertex = 0;
@@ -114,7 +111,10 @@ int main(int argc, char* argv[]) {
 
     std::cout << "\n===== DIJKSTRA'S ALGORITHM RESULTS =====\n";
     std::cout << "Execution time: " << duration_dijkstra_micro.count() << " microseconds -> " << duration_dijkstra_milli.count() << " milliseconds.\n";
-    std::cout << "Shortest paths from start (" << startVertex << "):\n";
+    std::cout << "Shortest path from " << startVertex << " to " << endVertex << ":\n";
+    std::cout << "Cost: " << dijkstra.getShortestDistanceTo(endVertex) << "\nPath: ";
+    printPath(dijkstra.getShortestPathTo(endVertex));
+    std::cout << std::endl;
     std::cout << "--------------------------------------\n";
     //! Uncomment to print all paths
     // for (int i = 0; i < size; ++i) {
@@ -126,7 +126,10 @@ int main(int argc, char* argv[]) {
     std::cout << "\n===== BELLMAN-FORD ALGORITHM RESULTS =====\n";
     std::cout << "Execution time: " << duration_bf_micro.count() << " microseconds -> " << duration_bf_milli.count() << " milliseconds.\n";
     if (bellmanFordSuccess) {
-        std::cout << "Shortest paths from start (" << startVertex << "):\n";
+        std::cout << "Shortest path from " << startVertex << " to " << endVertex << ":\n";
+        std::cout << "Cost: " << bellmanFord.getShortestDistanceTo(endVertex) << "\nPath: ";
+        printPath(bellmanFord.getShortestPathTo(endVertex));
+        std::cout << std::endl;
         std::cout << "-------------------------------------------\n";
         //! Uncomment to print all paths
         // for (int i = 0; i < size; ++i) {

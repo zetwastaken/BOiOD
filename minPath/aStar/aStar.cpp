@@ -7,7 +7,10 @@
 #include <algorithm>
 
 AStar::AStar(const std::vector<std::vector<int>> &graph, const std::vector<Point> &coordinates)
-    : graph(graph), coordinates(coordinates), numVertices(graph.size()), distance(-1) {}
+    : graph(graph), coordinates(coordinates), numVertices(graph.size()), distance(-1), useHeuristic(true) {}
+
+AStar::AStar(const std::vector<std::vector<int>> &graph, const std::vector<Point> &coordinates, bool useHeuristic)
+    : graph(graph), coordinates(coordinates), numVertices(graph.size()), distance(-1), useHeuristic(useHeuristic) {}
 
 bool AStar::findShortestPath(int startVertex, int endVertex)
 {
@@ -73,8 +76,20 @@ std::vector<int> AStar::getShortestPath() const
 
 int AStar::heuristic(int from, int to) const
 {
+    // If heuristic disabled (e.g., weights are random), fall back to Dijkstra
+    if (!useHeuristic) return 0;
+
+    // Guard against invalid indices
+    if (from < 0 || to < 0 ||
+        from >= static_cast<int>(coordinates.size()) ||
+        to >= static_cast<int>(coordinates.size()))
+    {
+        return 0;
+    }
+
+    // Euclidean distance heuristic (admissible when edge weights equal geometric distances)
     int dx = coordinates[from].x - coordinates[to].x;
     int dy = coordinates[from].y - coordinates[to].y;
-    return static_cast<int>(std::sqrt(dx * dx + dy * dy));
+    return static_cast<int>(std::ceil(std::sqrt(dx * dx + dy * dy)));
 }
 
