@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
     //Generate a random adjacency matrix with coordinates
     // Edge weights will be based on Euclidean distances between coordinates
-    size = 500;            // Number of vertices
+    size = 100;            // Number of vertices
     double density = 0.6;  // Graph density (%)
     int maxWeight = 100;   // Maximum edge weight
     // matrix = generateAdjacencyMatrix(size, density, maxWeight);
@@ -117,11 +117,11 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
     std::cout << "--------------------------------------\n";
     //! Uncomment to print all paths
-    // for (int i = 0; i < size; ++i) {
-    //     std::cout << "To " << i << ":\tCost: " << dijkstra.getShortestDistanceTo(i) << "\tPath: ";
-    //     printPath(dijkstra.getShortestPathTo(i));
-    //     std::cout << std::endl;
-    // }
+    for (int i = 0; i < size; ++i) {
+        std::cout << "To " << i << ":\tCost: " << dijkstra.getShortestDistanceTo(i) << "\tPath: ";
+        printPath(dijkstra.getShortestPathTo(i));
+        std::cout << std::endl;
+    }
 
     std::cout << "\n===== BELLMAN-FORD ALGORITHM RESULTS =====\n";
     std::cout << "Execution time: " << duration_bf_micro.count() << " microseconds -> " << duration_bf_milli.count() << " milliseconds.\n";
@@ -132,11 +132,11 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
         std::cout << "-------------------------------------------\n";
         //! Uncomment to print all paths
-        // for (int i = 0; i < size; ++i) {
-        //     std::cout << "To " << i << ":\tCost: " << bellmanFord.getShortestDistanceTo(i) << "\tPath: ";
-        //     printPath(bellmanFord.getShortestPathTo(i));
-        //     std::cout << std::endl;
-        // }
+        for (int i = 0; i < size; ++i) {
+            std::cout << "To " << i << ":\tCost: " << bellmanFord.getShortestDistanceTo(i) << "\tPath: ";
+            printPath(bellmanFord.getShortestPathTo(i));
+            std::cout << std::endl;
+        }
     } else {
         std::cout << "Negative weight cycle detected! Results are undefined.\n";
     }
