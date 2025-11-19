@@ -1,0 +1,10 @@
+algorithm,graph_size,density,generator,max_weight,run_id,start,end,execution_time_us,success,path_cost,path_length,edges,actual_density
+Dijkstra,100,0.25,euclidean,100,1,0,99,4146,1,249,3,2469,0.249394
+BellmanFord,100,0.25,euclidean,100,1,0,99,13295,1,249,3,2469,0.249394
+AStar,100,0.25,euclidean,100,1,0,99,38,1,249,3,2469,0.249394
+Dijkstra,100,0.25,euclidean,100,2,0,99,3909,1,692,2,2424,0.244848
+BellmanFord,100,0.25,euclidean,100,2,0,99,16117,1,692,2,2424,0.244848
+AStar,100,0.25,euclidean,100,2,0,99,25,1,692,2,2424,0.244848
+Dijkstra,100,0.25,euclidean,100,3,0,99,4014,1,618,4,2421,0.244545
+BellmanFord,100,0.25,euclidean,100,3,0,99,13141,1,618,4,2421,0.244545
+AStar,100,0.25,euclidean,100,3,0,99,61,1,618,4,2421,0.244545

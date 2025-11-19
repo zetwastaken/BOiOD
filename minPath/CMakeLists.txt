@@ -33,6 +33,20 @@ include_directories(
 # Create executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+# Benchmark executable (separate target to automate runs and CSV output)
+add_executable(${PROJECT_NAME}_benchmark
+    benchmark.cpp
+    Bellman-Ford/BellmanFord.cpp
+    Dijkstra/dijkstra_algorithm.cpp
+    dataGenerator/dataGenerator.cpp
+    aStar/aStar.cpp
+)
+
+target_compile_options(${PROJECT_NAME}_benchmark PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra>
+)
+
 # Add compiler options - customize based on your needs
 target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
