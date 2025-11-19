@@ -15,10 +15,17 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Source files - add new source files here
 set(SOURCES
     main.cpp
-    Bellman-Ford/BellmanFord.cpp    # Uncomment when adding these files
+    Bellman-Ford/BellmanFord.cpp
     Dijkstra/dijkstra_algorithm.cpp
     dataGenerator/dataGenerator.cpp
     aStar/aStar.cpp
+)
+
+set(MAXFLOW_SOURCES
+    main_maxflow.cpp
+    dataGenerator/dataGenerator.cpp
+    Ford-Fulkerson/FordFulkerson.cpp
+    Edmonds-Karp/EdmondsKarp.cpp
 )
 
 # Include directories - add new include directories here
@@ -28,6 +35,8 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/Dijkstra
     ${CMAKE_SOURCE_DIR}/dataGenerator
     ${CMAKE_SOURCE_DIR}/aStar
+    ${CMAKE_SOURCE_DIR}/Ford-Fulkerson
+    ${CMAKE_SOURCE_DIR}/Edmonds-Karp
 )
 
 # Create executable
@@ -43,6 +52,14 @@ add_executable(${PROJECT_NAME}_benchmark
 )
 
 target_compile_options(${PROJECT_NAME}_benchmark PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra>
+)
+
+# Max flow executable (Ford-Fulkerson and Edmonds-Karp algorithms)
+add_executable(${PROJECT_NAME}_maxflow ${MAXFLOW_SOURCES})
+
+target_compile_options(${PROJECT_NAME}_maxflow PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
     $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra>
 )

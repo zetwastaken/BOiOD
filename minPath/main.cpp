@@ -112,31 +112,33 @@ int main(int argc, char* argv[]) {
     std::cout << "\n===== DIJKSTRA'S ALGORITHM RESULTS =====\n";
     std::cout << "Execution time: " << duration_dijkstra_micro.count() << " microseconds -> " << duration_dijkstra_milli.count() << " milliseconds.\n";
     std::cout << "Shortest path from " << startVertex << " to " << endVertex << ":\n";
-    std::cout << "Cost: " << dijkstra.getShortestDistanceTo(endVertex) << "\nPath: ";
-    printPath(dijkstra.getShortestPathTo(endVertex));
-    std::cout << std::endl;
-    std::cout << "--------------------------------------\n";
-    //! Uncomment to print all paths
-    for (int i = 0; i < size; ++i) {
-        std::cout << "To " << i << ":\tCost: " << dijkstra.getShortestDistanceTo(i) << "\tPath: ";
-        printPath(dijkstra.getShortestPathTo(i));
-        std::cout << std::endl;
-    }
+    std::cout << "Cost: " << dijkstra.getShortestDistanceTo(endVertex) << std::endl;
+    // std::cout << "\nPath: ";
+    // printPath(dijkstra.getShortestPathTo(endVertex));
+    // std::cout << std::endl;
+    // std::cout << "--------------------------------------\n";
+    // //! Uncomment to print all paths
+    // for (int i = 0; i < size; ++i) {
+    //     std::cout << "To " << i << ":\tCost: " << dijkstra.getShortestDistanceTo(i) << "\tPath: ";
+    //     printPath(dijkstra.getShortestPathTo(i));
+    //     std::cout << std::endl;
+    // }
 
     std::cout << "\n===== BELLMAN-FORD ALGORITHM RESULTS =====\n";
     std::cout << "Execution time: " << duration_bf_micro.count() << " microseconds -> " << duration_bf_milli.count() << " milliseconds.\n";
     if (bellmanFordSuccess) {
         std::cout << "Shortest path from " << startVertex << " to " << endVertex << ":\n";
-        std::cout << "Cost: " << bellmanFord.getShortestDistanceTo(endVertex) << "\nPath: ";
-        printPath(bellmanFord.getShortestPathTo(endVertex));
-        std::cout << std::endl;
-        std::cout << "-------------------------------------------\n";
-        //! Uncomment to print all paths
-        for (int i = 0; i < size; ++i) {
-            std::cout << "To " << i << ":\tCost: " << bellmanFord.getShortestDistanceTo(i) << "\tPath: ";
-            printPath(bellmanFord.getShortestPathTo(i));
-            std::cout << std::endl;
-        }
+        std::cout << "Cost: " << bellmanFord.getShortestDistanceTo(endVertex) << std::endl;
+        // std::cout << "\nPath: ";
+        // printPath(bellmanFord.getShortestPathTo(endVertex));
+        // std::cout << std::endl;
+        // std::cout << "-------------------------------------------\n";
+        // //! Uncomment to print all paths
+        // for (int i = 0; i < size; ++i) {
+        //     std::cout << "To " << i << ":\tCost: " << bellmanFord.getShortestDistanceTo(i) << "\tPath: ";
+        //     printPath(bellmanFord.getShortestPathTo(i));
+        //     std::cout << std::endl;
+        // }
     } else {
         std::cout << "Negative weight cycle detected! Results are undefined.\n";
     }
@@ -144,12 +146,12 @@ int main(int argc, char* argv[]) {
     std::cout << "\n===== A* ALGORITHM RESULTS =====\n";
     std::cout << "Execution time: " << duration_astar_micro.count() << " microseconds -> " << duration_astar_milli.count() << " milliseconds.\n";
     std::cout << "Searching path from " << startVertex << " to " << endVertex << ":\n";
-    std::cout << "---------------------------------\n";
     if (aStarSuccess) {
         std::cout << "Path found!\n";
-        std::cout << "Cost: " << aStar.getShortestDistance() << "\nPath: ";
-        printPath(aStar.getShortestPath());
-        std::cout << std::endl;
+        std::cout << "Cost: " << aStar.getShortestDistance() << std::endl;
+        // std::cout << "\nPath: ";
+        // printPath(aStar.getShortestPath());
+        // std::cout << std::endl;
     } else {
         std::cout << "Path does not exist.\n";
     }

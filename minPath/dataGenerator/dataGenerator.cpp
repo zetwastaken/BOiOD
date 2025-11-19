@@ -150,3 +150,47 @@ std::vector<std::vector<int>> generateAdjacencyMatrixWithCoordinates(int numVert
 
     return adjacencyMatrix;
 }
+
+std::vector<std::vector<int>> generateFlowNetwork(int numVertices, double density, int maxCapacity)
+{
+    if (numVertices <= 0)
+    {
+        std::cerr << "Error: numVertices must be positive." << std::endl;
+        return {};
+    }
+    if (density < 0.0 || density > 1.0)
+    {
+        std::cerr << "Error: Network density must be in range [0.0, 1.0]" << std::endl;
+        return {};
+    }
+    if (maxCapacity <= 0)
+    {
+        std::cerr << "Error: maxCapacity must be positive" << std::endl;
+        return {};
+    }
+
+    //* Initialize random number generator
+    static std::mt19937 gen(static_cast<unsigned int>(time(0)));
+    std::uniform_real_distribution<> densityDist(0.0, 1.0);
+    std::uniform_int_distribution<> capacityDist(1, maxCapacity);
+
+    //* Inicjalizacja macierzy przepustowości zerami (brak krawędzi = przepustowość 0)
+    std::vector<std::vector<int>> capacityMatrix(numVertices, std::vector<int>(numVertices, 0));
+
+    //* Generuj krawędzie skierowane z przepustowościami
+    for (int i = 0; i < numVertices; ++i)
+    {
+        for (int j = 0; j < numVertices; ++j)
+        {
+            if (i == j) continue;
+
+            //? Jeśli istnieje krawędź, nadaj jej przepustowość
+            if (densityDist(gen) < density)
+            {
+                capacityMatrix[i][j] = capacityDist(gen);
+            }
+        }
+    }
+
+    return capacityMatrix;
+}

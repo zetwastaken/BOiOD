@@ -1,5 +1,5 @@
 #include "dijkstra_algorithm.h"
-#include "dataGenerator/dataGenerator.h"
+#include "../dataGenerator/dataGenerator.h"
 
 #include <limits>
 #include <algorithm>
