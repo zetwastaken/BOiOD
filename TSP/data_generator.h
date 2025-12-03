@@ -10,4 +10,7 @@ std::vector<std::vector<int>> loadDataAndCreateDistanceMatrix(const std::string&
 // Funkcja do wygenerowania danych dla podanej liczby miast
 std::vector<std::vector<int>> generateData(int numCities, bool saveToFile = false, const std::string& filename = "");
 
+// Wczytaj współrzędne miast (x, y) z pliku
+std::vector<std::pair<double, double>> loadCityCoordinates(const std::string& filename);
+
 #endif // DATA_GENERATOR_H

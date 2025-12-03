@@ -113,3 +113,25 @@ vector<vector<int>> generateData(int numCities, bool saveToFile, const string& f
     
     return distanceMatrix;
 }
+
+vector<pair<double, double>> loadCityCoordinates(const string& filename) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Error: Can't open file " << filename << endl;
+        return {};
+    }
+
+    int numCities = 0;
+    file >> numCities;
+    if (numCities <= 0) {
+        cerr << "Error: Invalid city count in file " << filename << endl;
+        return {};
+    }
+
+    vector<pair<double, double>> coords(numCities);
+    for (int i = 0; i < numCities; i++) {
+        file >> coords[i].first >> coords[i].second;
+    }
+
+    return coords;
+}
