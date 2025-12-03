@@ -1,9 +1,19 @@
-/.DS_Store
-/.vscode
 .DS_Store
-Makefile
+.vscode/
+**/.vscode/
+.vs/
+
+# Build directories
 build/
+**/build/
 cmake-build-*/
+**/cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# Binaries and intermediate outputs
 *.o
 *.obj
 *.exe
@@ -13,5 +23,13 @@ cmake-build-*/
 *.ilk
 *.pdb
 *.idb
-.vs/*
+*.a
+*.lib
+*.dll
+*.so
+*.dylib
+*.dSYM/
+*.dSYM
 
+# Generated application artifacts
+**/output/
