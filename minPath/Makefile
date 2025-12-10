@@ -19,15 +19,21 @@ BENCHMARK_SOURCES = benchmark.cpp \
                     Bellman-Ford/BellmanFord.cpp \
                     aStar/aStar.cpp
 
-MAXFLOW_SOURCES = main_maxflow.cpp \
+MAXFLOW_SOURCES = maxflow/main_maxflow.cpp \
                   dataGenerator/dataGenerator.cpp \
-                  Ford-Fulkerson/FordFulkerson.cpp \
-                  Edmonds-Karp/EdmondsKarp.cpp
+                  maxflow/Ford-Fulkerson/FordFulkerson.cpp \
+                  maxflow/Edmonds-Karp/EdmondsKarp.cpp
+
+MAXFLOW_BENCH_SOURCES = maxflow/maxflow_benchmark.cpp \
+                        dataGenerator/dataGenerator.cpp \
+                        maxflow/Ford-Fulkerson/FordFulkerson.cpp \
+                        maxflow/Edmonds-Karp/EdmondsKarp.cpp
 
 # Output executables
 TARGET = $(OUTPUT_DIR)/main
 BENCHMARK_TARGET = $(OUTPUT_DIR)/benchmark
 MAXFLOW_TARGET = $(OUTPUT_DIR)/main_maxflow
+MAXFLOW_BENCH_TARGET = $(OUTPUT_DIR)/maxflow_benchmark
 
 # Default target
 all: $(TARGET)
@@ -54,6 +60,13 @@ $(MAXFLOW_TARGET): $(MAXFLOW_SOURCES)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(MAXFLOW_SOURCES) -o $(MAXFLOW_TARGET)
 	@echo "Build complete: $(MAXFLOW_TARGET)"
 
+maxflow-benchmark: $(MAXFLOW_BENCH_TARGET)
+
+$(MAXFLOW_BENCH_TARGET): $(MAXFLOW_BENCH_SOURCES)
+	@mkdir -p $(OUTPUT_DIR)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(MAXFLOW_BENCH_SOURCES) -o $(MAXFLOW_BENCH_TARGET)
+	@echo "Build complete: $(MAXFLOW_BENCH_TARGET)"
+
 # Run main program
 run: $(TARGET)
 	./$(TARGET)
@@ -75,7 +88,7 @@ clean:
 rebuild: clean all
 
 # Build all targets
-all-targets: $(TARGET) $(BENCHMARK_TARGET) $(MAXFLOW_TARGET)
+all-targets: $(TARGET) $(BENCHMARK_TARGET) $(MAXFLOW_TARGET) $(MAXFLOW_BENCH_TARGET)
 	@echo "All targets built successfully"
 
-.PHONY: all benchmark maxflow run run-benchmark run-maxflow clean rebuild all-targets
+.PHONY: all benchmark maxflow maxflow-benchmark run run-benchmark run-maxflow clean rebuild all-targets

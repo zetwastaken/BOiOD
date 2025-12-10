@@ -2,7 +2,7 @@
 #include <vector>
 #include <chrono>
 
-#include "dataGenerator/dataGenerator.h"
+#include "../dataGenerator/dataGenerator.h"
 #include "Ford-Fulkerson/FordFulkerson.h"
 #include "Edmonds-Karp/EdmondsKarp.h"
 

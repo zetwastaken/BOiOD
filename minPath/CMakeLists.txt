@@ -22,10 +22,10 @@ set(SOURCES
 )
 
 set(MAXFLOW_SOURCES
-    main_maxflow.cpp
+    maxflow/main_maxflow.cpp
     dataGenerator/dataGenerator.cpp
-    Ford-Fulkerson/FordFulkerson.cpp
-    Edmonds-Karp/EdmondsKarp.cpp
+    maxflow/Ford-Fulkerson/FordFulkerson.cpp
+    maxflow/Edmonds-Karp/EdmondsKarp.cpp
 )
 
 # Include directories - add new include directories here
@@ -35,8 +35,9 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/Dijkstra
     ${CMAKE_SOURCE_DIR}/dataGenerator
     ${CMAKE_SOURCE_DIR}/aStar
-    ${CMAKE_SOURCE_DIR}/Ford-Fulkerson
-    ${CMAKE_SOURCE_DIR}/Edmonds-Karp
+    ${CMAKE_SOURCE_DIR}/maxflow
+    ${CMAKE_SOURCE_DIR}/maxflow/Ford-Fulkerson
+    ${CMAKE_SOURCE_DIR}/maxflow/Edmonds-Karp
 )
 
 # Create executable

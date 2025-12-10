@@ -107,13 +107,18 @@ minPath/
 ├── aStar/                  # Algorytm A*
 ├── Bellman-Ford/           # Algorytm Bellmana-Forda
 ├── Dijkstra/               # Algorytm Dijkstry
-├── Ford-Fulkerson/         # Algorytm Forda-Fulkersona
-├── Edmonds-Karp/           # Algorytm Edmondsa-Karpa
+├── maxflow/                # Wszystko dla algorytmów max-flow
+│   ├── Ford-Fulkerson/     # Algorytm Forda-Fulkersona
+│   ├── Edmonds-Karp/       # Algorytm Edmondsa-Karpa
+│   ├── main_maxflow.cpp    # Program demonstracyjny max-flow
+│   ├── maxflow_benchmark.cpp# Benchmark max-flow
+│   ├── plots_maxflow.py    # Wykresy z benchmarku max-flow
+│   ├── benchmark_maxflow.csv       # (po uruchomieniu) wyniki surowe
+│   └── benchmark_maxflow_agg.csv   # (po uruchomieniu) wyniki zagregowane
 ├── dataGenerator/          # Generator grafów i sieci
 ├── output/                 # Skompilowane programy
 ├── problemData/            # Pliki z danymi testowymi
 ├── main.cpp                # Program główny (najkrótsze ścieżki)
-├── main_maxflow.cpp        # Program max flow
 ├── benchmark.cpp           # Program benchmarkowy
 ├── Makefile                # Plik kompilacji Make
 └── CMakeLists.txt          # Plik konfiguracji CMake
